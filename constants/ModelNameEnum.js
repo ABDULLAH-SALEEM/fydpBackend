@@ -16,13 +16,7 @@ const MODEL_NAME = {
   CHATPAGE:"ChatPage",
   CUSTOMPAGE:"CustomPage",
   CUSTOM:"Custom",
-
-
-
-
-
-
-
+  INQUIRIES:"Inquiries",
 };
 
 module.exports = {

@@ -42,7 +42,9 @@ function createUser(data) {
     "firstname",
     "lastname",
     "tokens",
-    "role"
+    "role",
+    "number",
+    "companyName"
   ]);
 
   const newUser = new UserModel(userData);
@@ -189,6 +191,7 @@ return output
 
 
 module.exports = {
+  getAllUsers,
   findUser,
   createUser,
   updateUserPassword,

@@ -15,6 +15,8 @@ const UserSchema = new Schema(
       unique: true,
       required: true
     },
+    companyName:{type: Types.String},
+    number:{type: Types.Number},
     password: { type: Types.String },
     number:{type:Types.Number},
     role:{type:Types.String},
