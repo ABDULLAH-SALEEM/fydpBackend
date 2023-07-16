@@ -29,6 +29,7 @@ const {
   deleteUserById,
   getDashboardDetails,
   noOfUsers,
+  getUserDataByEmail
 } = require("#services/auth.service");
 
 //#routes
@@ -37,6 +38,7 @@ router.post("/get-otp", getOtp);
 router.post("/signup", createNewAccount);
 router.get("/get-dashboard", getDashboard);
 router.get("/no-of-users", noOfUsersController);
+router.get("/get-user/:email",getUserByEmail)
 
 router.get("/get-all-users", userController);
 router.post("/check-email-exists", checkEmailExist);
@@ -309,7 +311,7 @@ async function getOtp(req, res, next) {
     }
     const otp = await generateOTP(req.body.email);
     console.log(otp);
-    await sendOtpEmail(req.body.email, otp)
+    await sendOtpEmail(req.body.email, otp);
     res.generateResponse(200, "OTP Sended, Please check email.");
   } catch (err) {
     const error = manageError(err);
@@ -320,7 +322,7 @@ async function createNewAccount(req, res, next) {
   if (!req.body.otp) {
     return res.generateResponse(400, "Missing required fields");
   }
- 
+
   try {
     const otpInstance = await getOtpData(req.body.email);
 
@@ -328,13 +330,15 @@ async function createNewAccount(req, res, next) {
       return res.generateResponse(400, "Invalid or expired otp");
     }
     await removeOtp(otpInstance._id);
-    
+
     const userData = {
       email: req.body.email,
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       password: UserModel.encryptPassword(req.body.password),
-      role:req.body.role,
+      companyName: req.body.companyName,
+      number: req.body.number,
+      role: req.body.role,
       verified: true,
     };
     const newUser = await createUser(userData);
@@ -573,6 +577,26 @@ async function getProfile(req, res, next) {
     res.generateResponse(error.code, error.message);
   }
 }
+
+async function getUserByEmail(req, res, next) {
+  try {
+    if (!req.params) {
+      return res.generateResponse(401, `Error in getting user data`);
+    }
+
+    const user=await getUserDataByEmail(req.params.email)
+
+    res.generateResponse(
+      200,
+      "user get successfully",
+      user
+    );
+  } catch (err) {
+    const error = manageError(err);
+    res.generateResponse(error.code, error.message);
+  }
+}
+
 
 async function socialLogin(req, res, next) {
   // Validate request body

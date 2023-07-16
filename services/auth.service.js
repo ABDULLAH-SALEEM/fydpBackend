@@ -1,17 +1,17 @@
 const { UserModel } = require("#models/user");
 const { _pickAllowedFields } = require("#helper/utils");
 const { getAuth, app } = require("#common/firebase");
-const Stripe = require('stripe')("sk_test_51N2Y8SBwRKNKiXUsyeDN1LBPmGc7JbXd85R2nf5MRb2Akeuc8KLQTkbuvuJF8l0j13U6ieFavK17QLPoTRRbfAru00TLBATDAU");
-const {
-  cancelPackage,
-} = require("#services/email.service");
+const Stripe = require("stripe")(
+  "sk_test_51N2Y8SBwRKNKiXUsyeDN1LBPmGc7JbXd85R2nf5MRb2Akeuc8KLQTkbuvuJF8l0j13U6ieFavK17QLPoTRRbfAru00TLBATDAU"
+);
+const { cancelPackage } = require("#services/email.service");
 
 function getAllUsers(filter) {
   return UserModel.find(filter).select([
     "-password",
     "-__v",
     "-updatedAt",
-    "-createdAt"
+    "-createdAt",
   ]);
 }
 function updateUserData(_id, data) {
@@ -25,7 +25,6 @@ function updateUserData(_id, data) {
     new: true,
     runValidators: true,
   }).select(["-password", "-__v", "-updatedAt", "-createdAt"]);
-
 }
 function findUser(filter) {
   return UserModel.findOne(filter);
@@ -44,7 +43,8 @@ function createUser(data) {
     "tokens",
     "role",
     "number",
-    "companyName"
+    "companyName",
+    "ratings",
   ]);
 
   const newUser = new UserModel(userData);
@@ -58,7 +58,7 @@ function updateUserPassword(_id, data) {
   // Update user
   return UserModel.findOneAndUpdate({ _id }, userData, {
     new: true,
-    runValidators: true
+    runValidators: true,
   }).select(["-password", "-__v", "-updatedAt", "-createdAt"]);
 }
 async function verifyIdToken(token) {
@@ -71,22 +71,24 @@ async function verifyIdToken(token) {
   }
 }
 async function updateUserTokensById(id, data) {
-  const findUser = await UserModel.findOne({ _id: id })
+  const findUser = await UserModel.findOne({ _id: id });
   let updatedTokens;
   if (data.action === "add") {
-    updatedTokens = Number(findUser.tokens) + Number(data.tokens)
-  }
-  else {
-    updatedTokens = Number(findUser.tokens) - Number(data.tokens)
+    updatedTokens = Number(findUser.tokens) + Number(data.tokens);
+  } else {
+    updatedTokens = Number(findUser.tokens) - Number(data.tokens);
   }
   if (updatedTokens < 0) {
-    updatedTokens = 0
+    updatedTokens = 0;
   }
-  return await UserModel.findOneAndUpdate({ _id: id }, { tokens: updatedTokens }, { new: true })
-
+  return await UserModel.findOneAndUpdate(
+    { _id: id },
+    { tokens: updatedTokens },
+    { new: true }
+  );
 }
 async function deleteUserById(id) {
-  const user = await UserModel.findById(id)
+  const user = await UserModel.findById(id);
   if (user.subscriptionId) {
     Stripe.subscriptions.del(
       user.subscriptionId,
@@ -102,93 +104,105 @@ async function deleteUserById(id) {
   return UserModel.findByIdAndDelete(id);
 }
 
-
 async function getDashboardDetails(filter) {
-
-
- const userDetails= await UserModel.aggregate([
+  const userDetails = await UserModel.aggregate([
     {
       $group: {
         _id: null,
         totalUsers: { $sum: 1 },
         activeUsers: {
           $sum: {
-            $cond: { if: { $gt: ['$tokens', 0] }, then: 1, else: 0 }
-          }
+            $cond: { if: { $gt: ["$tokens", 0] }, then: 1, else: 0 },
+          },
         },
         nonActiveUsers: {
           $sum: {
-            $cond: { if: { $lt: ['$tokens', 1] }, then: 1, else: 0 }
-          }
-        }
-      }
-    }
-  ])
+            $cond: { if: { $lt: ["$tokens", 1] }, then: 1, else: 0 },
+          },
+        },
+      },
+    },
+  ]);
 
-  const usersBasedOnSubscription =await  UserModel.aggregate([
+  const usersBasedOnSubscription = await UserModel.aggregate([
     {
       $group: {
         _id: {
           planName: "$plan.en",
-          planType: "$plan.type"
+          planType: "$plan.type",
         },
-        count: { $sum: 1 }
-      }
-    }
-   
+        count: { $sum: 1 },
+      },
+    },
   ]);
-  const top10ConsumersInTimeFrame =await UserModel.find().sort({ burnTokens: -1 }).limit(10).exec();
+  const top10ConsumersInTimeFrame = await UserModel.find()
+    .sort({ burnTokens: -1 })
+    .limit(10)
+    .exec();
 
-  const output={usersBasedOnSubscription,userDetails,top10ConsumersInTimeFrame}
-  
+  const output = {
+    usersBasedOnSubscription,
+    userDetails,
+    top10ConsumersInTimeFrame,
+  };
 
-  return output
+  return output;
 }
-
 
 async function noOfUsers() {
-  const endDate = new Date()
-  const dayStartDate= new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
-  const weekStartDate=new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const monthStartDate=new Date(endDate.getFullYear(), endDate.getMonth() - 1, endDate.getDate());
-  const yearStartDate=new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate()); // 1 year ago
-  console.log(dayStartDate)
+  const endDate = new Date();
+  const dayStartDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
+  const weekStartDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthStartDate = new Date(
+    endDate.getFullYear(),
+    endDate.getMonth() - 1,
+    endDate.getDate()
+  );
+  const yearStartDate = new Date(
+    endDate.getFullYear() - 1,
+    endDate.getMonth(),
+    endDate.getDate()
+  ); // 1 year ago
+  console.log(dayStartDate);
 
-  console.log(weekStartDate)
-  console.log(monthStartDate)
+  console.log(weekStartDate);
+  console.log(monthStartDate);
 
-console.log(yearStartDate)
+  console.log(yearStartDate);
 
-  const daily =await  UserModel.countDocuments({
+  const daily = await UserModel.countDocuments({
     createdAt: {
       $gte: dayStartDate,
-      $lt: endDate
-    }
+      $lt: endDate,
+    },
   });
-  const weekly =await  UserModel.countDocuments({
+  const weekly = await UserModel.countDocuments({
     createdAt: {
       $gte: weekStartDate,
-      $lt: endDate
-    }
+      $lt: endDate,
+    },
   });
-  const monthly =await  UserModel.countDocuments({
+  const monthly = await UserModel.countDocuments({
     createdAt: {
       $gte: monthStartDate,
-      $lt: endDate
-    }
+      $lt: endDate,
+    },
   });
-  const yearly =await  UserModel.countDocuments({
+  const yearly = await UserModel.countDocuments({
     createdAt: {
       $gte: yearStartDate,
-      $lt: endDate
-    }
+      $lt: endDate,
+    },
   });
-  const output={daily,weekly,monthly,yearly}
+  const output = { daily, weekly, monthly, yearly };
 
-return output
+  return output;
 }
 
-
+async function getUserDataByEmail(email) {
+  const data = await UserModel.findOne({ email });
+  return data;
+}
 
 module.exports = {
   getAllUsers,
@@ -201,5 +215,6 @@ module.exports = {
   updateUserTokensById,
   deleteUserById,
   getDashboardDetails,
-  noOfUsers
+  noOfUsers,
+  getUserDataByEmail,
 };

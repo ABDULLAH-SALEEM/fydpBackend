@@ -8,13 +8,17 @@ const {
   getInquiryById,
   getInquiryByEmail,
   createInquiry,
+  getInquiryByUser,
+  updateInquiry
 } = require("#services/inquiry.service");
 
 //#routes
 router.post("/create-inquiry", [jwtAuth], createInquiryController);
 router.get("/get-all-inquiries", [jwtAuth], getAllInquiriesController);
+router.get("/get-user-inquiries", [jwtAuth], getUserInquiriesController);
 router.get("/get-inquiry-by-id/:id", [jwtAuth], getInquiryByIdController);
 router.get("/get-inquiry-by-email", [jwtAuth], getInquiryByEmailController);
+router.put("/update-inquiry-by-id/:id",[jwtAuth], updateInquiryByIdController);
 
 async function createInquiryController(req, res, next) {
   if (!req.body) {
@@ -48,6 +52,19 @@ async function getAllInquiriesController(req, res, next) {
   }
 }
 
+async function getUserInquiriesController(req, res, next) {
+  try {
+    const getInquiry = await getInquiryByUser(req.user._id);
+    if (!getInquiry) {
+      return res.generateResponse(400, "Error in getting Inquiry");
+    }
+    return res.generateResponse(200, " inquiries get successfully", getInquiry);
+  } catch (err) {
+    const error = manageError(err);
+    res.generateResponse(error.code, error.message);
+  }
+}
+
 async function getInquiryByIdController(req, res, next) {
   try {
     const getInquiry = await getInquiryById({ _id: req.params.id });
@@ -70,6 +87,28 @@ async function getInquiryByEmailController(req, res, next) {
     }
     return res.generateResponse(200, "Inquiries get successfully", getInquiry);
   } catch (err) {
+    const error = manageError(err);
+    res.generateResponse(error.code, error.message);
+  }
+}
+
+
+async function updateInquiryByIdController(req, res, next) {
+  if (!req.body) {
+    return res.generateResponse(400, "Missing required fields");
+  }
+  try {
+    const updatedInquiry = await updateInquiry(req.params.id, req.body);
+    if (!updatedInquiry) {
+      return res.generateResponse(400, "Error in updating quotation");
+    }
+    return res.generateResponse(
+      200,
+      "Quotation updated successfully",
+      updatedInquiry
+    );
+  } catch (err) {
+    console.log(err);
     const error = manageError(err);
     res.generateResponse(error.code, error.message);
   }

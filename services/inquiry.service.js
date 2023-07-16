@@ -13,9 +13,23 @@ function getInquiryByEmail(email) {
   return InquiryModel.find({ sentTo: email });
 }
 
+function getInquiryByUser(id) {
+  return InquiryModel.find({ userId: id });
+}
+
 function createInquiry(data) {
   const newInquiry = new InquiryModel({ ...data });
   return newInquiry.save();
+}
+
+async function updateInquiry(id, data) {
+  return await InquiryModel.findOneAndUpdate(
+    { _id: id },
+    { ...data },
+    {
+      new: true,
+    }
+  );
 }
 
 module.exports = {
@@ -23,5 +37,6 @@ module.exports = {
   getInquiryById,
   getInquiryByEmail,
   createInquiry,
-  //   updateAboutById,
+  getInquiryByUser,
+  updateInquiry,
 };

@@ -17,6 +17,11 @@ const MODEL_NAME = {
   CUSTOMPAGE:"CustomPage",
   CUSTOM:"Custom",
   INQUIRIES:"Inquiries",
+  QUOTATION:"Quotation",
+  ORDER:'Order',
+  PRODUCT:"Product",
+  ASSIGNMENT:"Assignment",
+  SHIPMENT:"Shipment"
 };
 
 module.exports = {
