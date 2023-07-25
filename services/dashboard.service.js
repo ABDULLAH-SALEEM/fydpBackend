@@ -30,12 +30,12 @@ async function getSellerDashboardData(email) {
         totalInquiries: { $sum: 1 },
         answeredInquiries: {
           $sum: {
-            $cond: [{ $eq: ["$status", "answered"] }, 1, 0],
+            $cond: [{ $eq: ["$status", "Answered"] }, 1, 0],
           },
         },
         unansweredInquiries: {
           $sum: {
-            $cond: [{ $eq: ["$status", "unanswered"] }, 1, 0],
+            $cond: [{ $eq: ["$status", "Unanswered"] }, 1, 0],
           },
         },
       },
@@ -85,12 +85,12 @@ async function getPurchaserDashboardData(id, email) {
         totalInquiries: { $sum: 1 },
         answeredInquiries: {
           $sum: {
-            $cond: [{ $eq: ["$status", "answered"] }, 1, 0],
+            $cond: [{ $eq: ["$status", "Answered"] }, 1, 0],
           },
         },
         unansweredInquiries: {
           $sum: {
-            $cond: [{ $eq: ["$status", "unanswered"] }, 1, 0],
+            $cond: [{ $eq: ["$status", "Unanswered"] }, 1, 0],
           },
         },
       },

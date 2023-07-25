@@ -204,6 +204,11 @@ async function getUserDataByEmail(email) {
   return data;
 }
 
+async function getUserDataById(id) {
+  const data = await UserModel.findOne({ _id:id });
+  return data;
+}
+
 module.exports = {
   getAllUsers,
   findUser,
@@ -217,4 +222,5 @@ module.exports = {
   getDashboardDetails,
   noOfUsers,
   getUserDataByEmail,
+  getUserDataById
 };

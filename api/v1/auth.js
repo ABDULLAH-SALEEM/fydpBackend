@@ -29,7 +29,8 @@ const {
   deleteUserById,
   getDashboardDetails,
   noOfUsers,
-  getUserDataByEmail
+  getUserDataByEmail,
+  getUserDataById
 } = require("#services/auth.service");
 
 //#routes
@@ -39,6 +40,7 @@ router.post("/signup", createNewAccount);
 router.get("/get-dashboard", getDashboard);
 router.get("/no-of-users", noOfUsersController);
 router.get("/get-user/:email",getUserByEmail)
+router.get('/get-user-by-id/:id',getUserById)
 
 router.get("/get-all-users", userController);
 router.post("/check-email-exists", checkEmailExist);
@@ -658,6 +660,25 @@ async function socialLogin(req, res, next) {
         ]),
       });
     }
+  } catch (err) {
+    const error = manageError(err);
+    res.generateResponse(error.code, error.message);
+  }
+}
+
+async function getUserById(req, res, next) {
+  try {
+    if (!req.params) {
+      return res.generateResponse(401, `Error in getting user data`);
+    }
+
+    const user=await getUserDataById(req.params.id)
+
+    res.generateResponse(
+      200,
+      "user get successfully",
+      user
+    );
   } catch (err) {
     const error = manageError(err);
     res.generateResponse(error.code, error.message);
