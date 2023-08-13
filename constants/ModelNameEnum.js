@@ -21,7 +21,8 @@ const MODEL_NAME = {
   ORDER:'Order',
   PRODUCT:"Product",
   ASSIGNMENT:"Assignment",
-  SHIPMENT:"Shipment"
+  SHIPMENT:"Shipment",
+  RATINGS:"Ratings"
 };
 
 module.exports = {
