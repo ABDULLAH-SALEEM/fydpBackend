@@ -18,7 +18,10 @@ router.get("/purchaser-dashboard", [jwtAuth], purchaserDashboardController);
 
 async function sellerDashboardController(req, res, next) {
   try {
-    const sellerDashboardData = await getSellerDashboardData(req.user.email);
+    const sellerDashboardData = await getSellerDashboardData(
+      req.user.email,
+      req.user._id
+    );
     if (!sellerDashboardData) {
       return res.generateResponse(400, "Error in getting seller dashboard");
     }

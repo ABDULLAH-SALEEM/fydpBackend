@@ -2,8 +2,9 @@ const { UserModel } = require("#models/user");
 const { OrderModel } = require("#models/order");
 const { InquiryModel } = require("#models/inquiry");
 const { QuotationModel } = require("#models/quotation");
+const { RatingsModel } = require("../models/ratings");
 
-async function getSellerDashboardData(email) {
+async function getSellerDashboardData(email,id) {
   const orderDetails = await OrderModel.aggregate([
     {
       $match: {
@@ -41,13 +42,36 @@ async function getSellerDashboardData(email) {
       },
     },
   ]);
+  const fiveStart = await RatingsModel.find({
+    ratingTo: id,
+    rating: 5,
+  }).countDocuments();
+  const fourStart = await RatingsModel.find({
+    ratingTo: id,
+    rating: 4,
+  }).countDocuments();
+  const threeStart = await RatingsModel.find({
+    ratingTo: id,
+    rating: 3,
+  }).countDocuments();
+  const twoStart = await RatingsModel.find({
+    ratingTo: id,
+    rating: 2,
+  }).countDocuments();
 
-  const output = { orderDetails, inquiryDetails };
+  const ratings = {
+    fiveStarCount: fiveStart,
+    fourStarCount: fourStart,
+    threeStarCount: threeStart,
+    twoStarCount: twoStart,
+  };
+
+  const output = { orderDetails, inquiryDetails, ratings };
   return output;
 }
 
 async function getPurchaserDashboardData(id, email) {
-    console.log(id)
+  console.log(id);
   const totalSellers = await UserModel.find({
     role: "Seller",
   }).countDocuments();

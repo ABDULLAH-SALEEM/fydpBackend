@@ -7,7 +7,7 @@ const { getAllRatings, createRating } = require("#services/rating.service");
 
 //#routes
 router.post("/create-rating", [jwtAuth], createRatingController);
-router.get("/get-all-rating", [jwtAuth], getAllRatingsController);
+router.get("/get-all-rating/:id", [jwtAuth], getAllRatingsController);
 
 async function createRatingController(req, res, next) {
   if (!req.body) {
@@ -28,7 +28,7 @@ async function createRatingController(req, res, next) {
 
 async function getAllRatingsController(req, res, next) {
   try {
-    const ratings = await getAllRatings(req.user._id);
+    const ratings = await getAllRatings(req.params.id);
     if (!ratings) {
       return res.generateResponse(400, "Error in getting ratings");
     }

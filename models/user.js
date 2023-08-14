@@ -15,7 +15,7 @@ const UserSchema = new Schema(
       unique: true,
       required: true,
     },
-    ratings: { type: Types.String, default:''  },
+    ratings: { type: Types.Number, default:0  },
     companyName: { type: Types.String },
     address: { type: Types.String },
     number: { type: Types.Number },
